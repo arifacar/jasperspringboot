@@ -1,7 +1,7 @@
 package com.arifacar.reports.service;
 
 import com.arifacar.reports.constant.DocumentType;
-import com.arifacar.reports.constant.ReportBaseEntity;
+import com.arifacar.reports.constant.ReportEntity;
 import com.arifacar.reports.utils.FileStreamConverter;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
@@ -40,14 +40,14 @@ public class ReportService {
     @Value("${mapUrl}")
     private String mapUrl;
 
-    public ResponseEntity<InputStreamResource> prepareResponse(File reportDocument) {
+    public ResponseEntity<InputStreamResource> prepareResponse(File reportDocument, DocumentType documentType) {
         FileInputStream fileInputStream = fileStreamConverter.getFileInputStream(reportDocument);
 
         return ResponseEntity
                 .ok()
                 .contentLength(reportDocument.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header("content-disposition", "filename=report")
+                .header("content-disposition", "filename=report." + documentType.toString().toLowerCase())
                 .body(new InputStreamResource(fileInputStream));
     }
 
@@ -95,7 +95,7 @@ public class ReportService {
     }
 
 
-    public JasperPrint preparePrint(ReportBaseEntity reportBaseEntity, String jrxmlName, Long entityId) {
+    public JasperPrint preparePrint(ReportEntity reportBaseEntity, String jrxmlName, Long entityId) {
         JasperPrint jasperPrint;
         JasperReport jasperReport;
 
@@ -110,13 +110,12 @@ public class ReportService {
             String query;
 
             switch (reportBaseEntity.toString()) {
-                case "MAP_ID":
-                    query = "SELECT * FROM " + jrxmlName + " WHERE MAP_ID = ?";
+                case "COUNTRY":
+                    query = "SELECT * FROM " + jrxmlName + " WHERE COUNTRY_ID = ?";
                     break;
 
                 default:
-                    "DATA_ID":
-                    query = "SELECT * FROM " + jrxmlName + " WHERE DATA_ID = ?";
+                    query = "SELECT * FROM " + jrxmlName + " WHERE CITY_ID = ?";
                     break;
             }
 
@@ -148,4 +147,14 @@ public class ReportService {
         return jasperPrint;
     }
 
+
+    public File crosstabReport(ReportEntity reportEntity, Long entityId, DocumentType documentType) {
+        JasperPrint jasperPrint = preparePrint(reportEntity, "CROSSTAB_REPORT", entityId);
+        return createReport(documentType, jasperPrint);
+    }
+
+    public File flatReport(ReportEntity reportEntity, Long entityId, DocumentType documentType) {
+        JasperPrint jasperPrint = preparePrint(reportEntity, "FLAT_REPORT", entityId);
+        return createReport(documentType, jasperPrint);
+    }
 }

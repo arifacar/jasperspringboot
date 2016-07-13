@@ -1,12 +1,14 @@
 package com.arifacar.reports.constant;
 
-public enum ReportBaseEntity {
+public enum ReportEntity {
 
-    REPORT_ID("REPORT_ID");
+    COUNTRY("COUNTRY"),
+    CITY("CITY"),
+    DISTRICT("DISTRIC");
 
     private final String reportBaseEntity;
 
-    ReportBaseEntity(String reportBaseEntity) {
+    ReportEntity(String reportBaseEntity) {
         this.reportBaseEntity = reportBaseEntity;
     }
 
